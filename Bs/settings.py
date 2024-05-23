@@ -53,6 +53,24 @@ ROBOTSTXT_OBEY = False
 #DOWNLOADER_MIDDLEWARES = {
 #    "Bs.middlewares.BsDownloaderMiddleware": 543,
 #}
+# DOWNLOADER_MIDDLEWARES = {
+#     'Bs.middlewares.RotateHeadersMiddleware': 543,
+# }
+
+# API_KEY = "2e76641c-f171-4306-8016-026d7b7b2954"
+# USER_AGENTS_URL = "https://headers.scrapeops.io/v1/user-agents"
+# SCRAPEOPS_FAKE_USER_AGENT_ENABLED = True  
+# ROTATE_USER_AGENT_ENABLED = True# Set to True to enable Fake User-Agent, False to disable
+DOWNLOADER_MIDDLEWARES = {
+'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+'scrapy_useragents.downloadermiddlewares.useragents.UserAgentsMiddleware': 500,
+
+}
+
+# DOWNLOADER_MIDDLEWARES = {
+#     'Bs.middlewares.RotateUserAgentMiddleware': 543,
+# }
+
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html

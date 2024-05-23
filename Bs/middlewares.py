@@ -101,3 +101,43 @@ class BsDownloaderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info("Spider opened: %s" % spider.name)
+import requests
+import random
+from scrapy import signals
+
+class RotateUserAgentMiddleware:
+    def __init__(self, api_key, user_agents_url):
+        self.api_key = api_key
+        self.user_agents_url = user_agents_url
+        self.user_agents = []
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        settings = crawler.settings
+        api_key = settings.get('API_KEY')
+        user_agents_url = settings.get('USER_AGENTS_URL')
+        middleware = cls(api_key, user_agents_url)
+        crawler.signals.connect(middleware.spider_opened, signal=signals.spider_opened)
+        return middleware
+
+    def spider_opened(self, spider):
+        self.fetch_user_agents()
+
+    def fetch_user_agents(self):
+        headers = {
+            'Authorization': f'Bearer {self.api_key}'
+        }
+        response = requests.get(self.user_agents_url, headers=headers)
+        if response.status_code == 200:
+            user_agents_data = response.json().get('result', [])
+            self.user_agents = [ua_data['user-agent'] for ua_data in user_agents_data]
+            random.shuffle(self.user_agents)
+        else:
+            raise Exception(f"Failed to fetch user agents. Status code: {response.status_code}")
+
+    def process_request(self, request, spider):
+        if not self.user_agents:
+            self.fetch_user_agents()
+        if self.user_agents:
+            user_agent = random.choice(self.user_agents)
+            request.headers.setdefault('User-Agent', user_agent)
